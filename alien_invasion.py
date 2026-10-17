@@ -18,15 +18,25 @@ class AlienInvasion:
         """Start main loop for game"""
         # running = True
         while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    #running = False # Probably this variable is not needed 
-                    sys.exit(0)
-            pygame.display.flip() # According to some Wikis, this enable graphics rendering 
-            self.screen.fill(self.screen_color) # Function a fills a color to surface object
-            self.clock.tick(self.game_settings.FPS) 
+            self.__check_events() #Responde to user's input
+            self.__update_screen()
             
-            self.ship.draw_me() # Draw the ship
+    def __check_events(self):
+        """Respond to inputs events"""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                #running = False # Probably this variable is not needed 
+                sys.exit(0)
+    
+
+    def __update_screen(self):
+        self.screen.fill(self.screen_color) # Function a fills a color to surface object
+            
+        self.clock.tick(self.game_settings.FPS) 
+            
+        self.ship.draw_me() # Draw the ship
+
+        pygame.display.flip() # According to some Wikis, this enable graphics rendering 
 
 if __name__ == "__main__":
     """Check if game is running as a script"""
