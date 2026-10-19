@@ -1,4 +1,5 @@
 import pygame
+import settings
 
 class Ship:
     """Class to manage ship propeties"""
@@ -14,3 +15,4 @@ class Ship:
         self.ship_rectangle.midbottom = self.screen_rectangle.midbottom # Make the ship's midbottom position equal to the screen's midbottom
     def draw_me(self):
         self.screen.blit(self.human_ship,self.ship_rectangle) # Draw image surface
+   

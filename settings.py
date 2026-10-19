@@ -4,3 +4,6 @@ class Settings:
         self.SCREEN_RESOLUTION = (1200,800) 
         self.SCREEN_COLOR = (230,230,230)
         self.FPS = 24
+        self.BASE_SPEED = 20.0
+        self.SPEED_LIMIT = 25.0
+        self.current_speed = self.BASE_SPEED
