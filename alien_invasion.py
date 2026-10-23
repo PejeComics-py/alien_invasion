@@ -2,6 +2,7 @@ import sys  # Module to interact with the system
 import pygame  # Module to create games 
 from settings import Settings 
 from ships import Ship
+from bullet import Bullet
 
 class AlienInvasion:
     """Class to manage game assets and behavior"""
@@ -14,13 +15,15 @@ class AlienInvasion:
         self.screen_color = (self.game_settings.SCREEN_COLOR)
         pygame.display.set_caption("Alien Invasion")
         self.ship = Ship(self)
+        self.bullets = pygame.sprite.Group()
 
     def run_game(self):
         """Start main loop for game"""
         # running = True
         while True:
-            self.__check_events() #Responde to user's input
+            self.__check_events() #Respond to user's input
             self.__update_screen()
+            self.bullets.update()
             
     def __check_events(self):
         """Respond to inputs events"""
@@ -30,52 +33,64 @@ class AlienInvasion:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     sys.exit(0)
+                if event.key == pygame.K_SPACE:
+                    # Shoot pew pew 
+                    self.__fire_bullet()
         self.__key_events()
        
     def __update_screen(self):
         self.screen.fill(self.screen_color) # Function a fills a color to surface object
-            
-        self.clock.tick(self.game_settings.FPS) 
-            
+               
         self.ship.draw_me() # Draw the ship
+
+        for bullet in self.bullets.sprites(): #Order is important, needs to draw rectangle before flip()
+            bullet.draw_bullet()
 
         pygame.display.flip() # According to some Wikis, this enable graphics rendering 
 
+        self.clock.tick(self.game_settings.FPS) 
+
         self.ship.ship_rectangle.clamp_ip(self.ship.screen_rectangle) # Ensure ship surface stays inside screen's rectangle
-  
+
+    
+    def __fire_bullet(self):
+        """Create bullet and add it to group"""
+        new_bullet = Bullet(self)
+        self.bullets.add(new_bullet)
+    
     def __key_events(self):
-        """Movement of ship"""
+        """Movement of ship and other functionalities"""
         keys = pygame.key.get_pressed() # Get boolean dictionary of states of keys in keyboard
-        # Logic for moving right 
         if keys[pygame.K_RIGHT] is True:
+            # Logic for moving right 
             if self.game_settings.current_speed < self.game_settings.SPEED_LIMIT: 
                 self.ship.ship_rectangle.x += self.game_settings.current_speed
                 self.game_settings.current_speed *=1.05
             else: 
                 self.ship.ship_rectangle.x += self.game_settings.SPEED_LIMIT
-        # Logic for moving left
         elif keys[pygame.K_LEFT] is True:
+            # Logic for moving left
             if self.game_settings.current_speed < self.game_settings.SPEED_LIMIT: 
                 self.ship.ship_rectangle.x -=self.game_settings.current_speed
                 self.game_settings.current_speed *=1.05
             else: 
                 self.ship.ship_rectangle.x -= self.game_settings.SPEED_LIMIT
-        # Logic for moving up 
         elif keys[pygame.K_UP] is True:
+            # Logic for moving up 
             if self.game_settings.current_speed < self.game_settings.SPEED_LIMIT: 
                 self.ship.ship_rectangle.y -=self.game_settings.current_speed
                 self.game_settings.current_speed *=1.05
             else: 
                 self.ship.ship_rectangle.y -= self.game_settings.SPEED_LIMIT
-        # Logic for moving down
         elif keys[pygame.K_DOWN] is True:
+            # Logic for moving down
             if self.game_settings.current_speed < self.game_settings.SPEED_LIMIT:
                 self.ship.ship_rectangle.y +=self.game_settings.current_speed
                 self.game_settings.current_speed *=1.05
             else: 
                 self.ship.ship_rectangle.y += self.game_settings.SPEED_LIMIT
-        # Resetting movement speed when a key not key is being pressed
         else:
+            # Resetting movement speed when a key not key is being pressed
             self.game_settings.current_speed = self.game_settings.BASE_SPEED
 
 if __name__ == "__main__":
