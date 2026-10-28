@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import sys  # Module to interact with the system
 import pygame  # Module to create games 
 from settings import Settings 
@@ -22,8 +24,8 @@ class AlienInvasion:
         # running = True
         while True:
             self.__check_events() #Respond to user's input
-            self.__update_screen()
-            self.bullets.update()
+            self.__update_screen() #Update screen 
+            self.__update_bullets() #Control bullets instances
             
     def __check_events(self):
         """Respond to inputs events"""
@@ -39,6 +41,7 @@ class AlienInvasion:
         self.__key_events()
        
     def __update_screen(self):
+        """Update screen events"""
         self.screen.fill(self.screen_color) # Function a fills a color to surface object
                
         self.ship.draw_me() # Draw the ship
@@ -48,15 +51,26 @@ class AlienInvasion:
 
         pygame.display.flip() # According to some Wikis, this enable graphics rendering 
 
-        self.clock.tick(self.game_settings.FPS) 
+        self.clock.tick(self.game_settings.FPS) #Limit games fps
 
         self.ship.ship_rectangle.clamp_ip(self.ship.screen_rectangle) # Ensure ship surface stays inside screen's rectangle
 
+    def __update_bullets(self):
+        """Update the bullet properties"""
+        self.bullets.update()
+        self.__remove_bullet()
+
+    def __remove_bullet(self):
+        """Remove the bullet"""
+        for bullet in self.bullets.copy():
+            if bullet.bullet_rect.bottom <= 0:
+                self.bullets.remove(bullet)
     
     def __fire_bullet(self):
         """Create bullet and add it to group"""
-        new_bullet = Bullet(self)
-        self.bullets.add(new_bullet)
+        if len(self.bullets) < self.game_settings.BULLET_LIMIT:
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
     
     def __key_events(self):
         """Movement of ship and other functionalities"""
