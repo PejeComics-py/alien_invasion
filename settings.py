@@ -10,8 +10,9 @@ class Settings:
         self.current_speed = self.BASE_SPEED
 
         # Bullet properties
-        self.BULLET_SPEED = 5.0
+        self.BULLET_SPEED = 15.0
         self.BULLET_WIDTH = 3
         self.BULLET_HEIGHT = 15
         self.BULLET_COLOR = (60, 60, 60)
+        self.BULLET_LIMIT = 3 
 

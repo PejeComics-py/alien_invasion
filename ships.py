@@ -1,5 +1,4 @@
 import pygame
-import settings
 
 class Ship:
     """Class to manage ship propeties"""
