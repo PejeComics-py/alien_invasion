@@ -5,6 +5,7 @@ import pygame  # Module to create games
 from settings import Settings 
 from ships import Ship
 from bullet import Bullet
+from alien import Alien
 
 class AlienInvasion:
     """Class to manage game assets and behavior"""
@@ -18,6 +19,9 @@ class AlienInvasion:
         pygame.display.set_caption("Alien Invasion")
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
+        self.aliens = pygame.sprite.Group()    
+        
+        self.__create_fleet()
 
     def run_game(self):
         """Start main loop for game"""
@@ -49,11 +53,14 @@ class AlienInvasion:
         for bullet in self.bullets.sprites(): #Order is important, needs to draw rectangle before flip()
             bullet.draw_bullet()
 
+        self.aliens.draw(self.screen)
+        
         pygame.display.flip() # According to some Wikis, this enable graphics rendering 
 
         self.clock.tick(self.game_settings.FPS) #Limit games fps
 
         self.ship.ship_rectangle.clamp_ip(self.ship.screen_rectangle) # Ensure ship surface stays inside screen's rectangle
+        
 
     def __update_bullets(self):
         """Update the bullet properties"""
@@ -72,6 +79,38 @@ class AlienInvasion:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
     
+    def __create_fleet(self):
+        """Create aliens' fleet at correct position"""
+        alien = Alien(self)
+        alien_width, alien_height = alien.rect.width, alien.rect.height
+        
+        # Get screen properties
+        current_x,current_y = alien_width, alien_height
+        screen_resolution = list(self.game_settings.SCREEN_RESOLUTION)
+        screen_width,screen_height = screen_resolution
+
+        # Loops to control alien generation in x and y
+        while current_y < ((screen_height / 2) - (4 * alien_height)):
+            while current_x < (screen_width - (2 * alien_width)):
+                
+                # Create alien instance and move 2 times the alien width
+                self.__create_alien(current_x,current_y)
+                current_x += 2 * alien_width
+
+            # Reset current_x to start new row
+            current_x = alien_width
+            current_y += 2 * alien_height
+    
+    def __create_alien(self, x, y):
+        """ Create new alien instance """
+        new_alien = Alien(self)
+        new_alien.x = x
+        # This is the important parameter to move alien position
+        new_alien.rect.x = x
+        new_alien.rect.y = y
+        self.aliens.add(new_alien)
+
+
     def __key_events(self):
         """Movement of ship and other functionalities"""
         keys = pygame.key.get_pressed() # Get boolean dictionary of states of keys in keyboard

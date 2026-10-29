@@ -14,5 +14,5 @@ class Settings:
         self.BULLET_WIDTH = 3
         self.BULLET_HEIGHT = 15
         self.BULLET_COLOR = (60, 60, 60)
-        self.BULLET_LIMIT = 3 
+        self.BULLET_LIMIT = 6 
 
