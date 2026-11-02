@@ -16,3 +16,5 @@ class Settings:
         self.BULLET_COLOR = (60, 60, 60)
         self.BULLET_LIMIT = 6 
 
+        # Alien properties
+        self.ALIEN_SPEED = 1.0 

@@ -30,6 +30,7 @@ class AlienInvasion:
             self.__check_events() #Respond to user's input
             self.__update_screen() #Update screen 
             self.__update_bullets() #Control bullets instances
+            self.__update_aliens()
             
     def __check_events(self):
         """Respond to inputs events"""
@@ -101,6 +102,10 @@ class AlienInvasion:
             current_x = alien_width
             current_y += 2 * alien_height
     
+    def __update_aliens(self):
+        """Update the aliens position"""
+        self.aliens.update()
+
     def __create_alien(self, x, y):
         """ Create new alien instance """
         new_alien = Alien(self)
