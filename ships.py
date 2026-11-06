@@ -10,8 +10,13 @@ class Ship:
         self.image = pygame.Surface.convert_alpha(pygame.image.load("./images/human_space.png")) # Load image
         self.human_ship = pygame.transform.scale(self.image,self.SHIP_SIZE)
         
-        self.ship_rectangle = self.human_ship.get_rect() # Get Rectangle of pygame image object
-        self.ship_rectangle.midbottom = self.screen_rectangle.midbottom # Make the ship's midbottom position equal to the screen's midbottom
+        self.rect = self.human_ship.get_rect() # Get Rectangle of pygame image object
+        self.rect.midbottom = self.screen_rectangle.midbottom # Make the ship's midbottom position equal to the screen's midbottom
     def draw_me(self):
-        self.screen.blit(self.human_ship,self.ship_rectangle) # Draw image surface
+        self.screen.blit(self.human_ship,self.rect) # Draw image surface
+    
+    def center_ship(self):
+        """Center ship lmao"""
+        self.rect.midbottom = self.screen_rectangle.midbottom
+        self.x = float(self.rect.x)
    

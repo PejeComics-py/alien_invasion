@@ -6,6 +6,8 @@ from settings import Settings
 from ships import Ship
 from bullet import Bullet
 from alien import Alien
+from time import sleep
+from gamestats import GameStats
 
 class AlienInvasion:
     """Class to manage game assets and behavior"""
@@ -20,30 +22,41 @@ class AlienInvasion:
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()    
-        
+        self.stats = GameStats(self)
+        # Start alien invasion bool
+        self.game_active = True
         self.__create_fleet()
 
     def run_game(self):
         """Start main loop for game"""
         # running = True
         while True:
-            self.__check_events() #Respond to user's input
             self.__update_screen() #Update screen 
-            self.__update_bullets() #Control bullets instances
-            self.__update_aliens()
+            if self.game_active:
+                self.__update_bullets() #Control bullets instances
+                self.__update_aliens()
+                self.__check_game_events() #Respond to user's input
+            else: 
+                self.__check_system_events()
             
-    def __check_events(self):
+    def __check_game_events(self):
         """Respond to inputs events"""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit(0)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    # Shoot pew pew 
+                    self.__fire_bullet()
+        self.__key_events()
+
+    def __check_system_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     sys.exit(0)
-                if event.key == pygame.K_SPACE:
-                    # Shoot pew pew 
-                    self.__fire_bullet()
-        self.__key_events()
        
     def __update_screen(self):
         """Update screen events"""
@@ -60,18 +73,31 @@ class AlienInvasion:
 
         self.clock.tick(self.game_settings.FPS) #Limit games fps
 
-        self.ship.ship_rectangle.clamp_ip(self.ship.screen_rectangle) # Ensure ship surface stays inside screen's rectangle
+        self.ship.rect.clamp_ip(self.ship.screen_rectangle) # Ensure ship surface stays inside screen's rectangle
         
 
     def __update_bullets(self):
         """Update the bullet properties"""
         self.bullets.update()
         self.__remove_bullet()
+        self.__check_bullet_collisions()
+        if len(self.aliens) == 0:
+            self.__reset()
+
+    def __check_bullet_collisions(self):
+        """Kill aliens with pew pew"""
+        collisions = pygame.sprite.groupcollide(self.bullets,self.aliens, True, True)
+
+    def __reset(self):
+        """ Reset game """
+        self.bullets.empty()
+        self.aliens.empty()
+        self.__create_fleet()
 
     def __remove_bullet(self):
         """Remove the bullet"""
         for bullet in self.bullets.copy():
-            if bullet.bullet_rect.bottom <= 0:
+            if bullet.rect.bottom <= 0:
                 self.bullets.remove(bullet)
     
     def __fire_bullet(self):
@@ -91,7 +117,7 @@ class AlienInvasion:
         screen_width,screen_height = screen_resolution
 
         # Loops to control alien generation in x and y
-        while current_y < ((screen_height / 2) - (4 * alien_height)):
+        while current_y < ((screen_height / 2) - (alien_height)):
             while current_x < (screen_width - (2 * alien_width)):
                 
                 # Create alien instance and move 2 times the alien width
@@ -104,7 +130,32 @@ class AlienInvasion:
     
     def __update_aliens(self):
         """Update the aliens position"""
+        self.__check_fleet_edges()
         self.aliens.update()
+        self.__check_ship_alien_collisions()
+
+    def __check_ship_alien_collisions(self):
+        """Check alien on ship collision"""
+        if pygame.sprite.spritecollideany(self.ship,self.aliens):
+            self.__ship_hit()
+        for alien in self.aliens.sprites():
+            if alien.rect.bottom >= self.screen.get_rect().height:
+                self.__ship_hit()
+                break
+
+    def __ship_hit(self):
+        """ Respond when ship is hit"""
+        # Reduce ship lives
+        self.stats.ships_lives -= 1
+
+        if self.stats.ships_lives > 0:
+            # Reset game
+            self.__reset()
+            # Create new fleet and center ship
+            self.ship.center_ship()
+            sleep(0.25)
+        else:
+            self.game_active = False 
 
     def __create_alien(self, x, y):
         """ Create new alien instance """
@@ -115,6 +166,18 @@ class AlienInvasion:
         new_alien.rect.y = y
         self.aliens.add(new_alien)
 
+    def __check_fleet_edges(self):
+        """Check if fleet has reached the edges"""
+        for alien in self.aliens.sprites():
+            if alien.check_edges():
+                self.__change_fleet_direction()
+                break
+    def __change_fleet_direction(self):
+        """Drop the entire fleet and change its position"""
+        for alien in self.aliens.sprites():
+            alien.rect.y += self.game_settings.FLEET_DROP_SPEED
+        # Inverse direction without using if statements, actually genius
+        self.game_settings.fleet_direction *= -1 
 
     def __key_events(self):
         """Movement of ship and other functionalities"""
@@ -122,31 +185,17 @@ class AlienInvasion:
         if keys[pygame.K_RIGHT] is True:
             # Logic for moving right 
             if self.game_settings.current_speed < self.game_settings.SPEED_LIMIT: 
-                self.ship.ship_rectangle.x += self.game_settings.current_speed
+                self.ship.rect.x += self.game_settings.current_speed
                 self.game_settings.current_speed *=1.05
             else: 
-                self.ship.ship_rectangle.x += self.game_settings.SPEED_LIMIT
+                self.ship.rect.x += self.game_settings.SPEED_LIMIT
         elif keys[pygame.K_LEFT] is True:
             # Logic for moving left
             if self.game_settings.current_speed < self.game_settings.SPEED_LIMIT: 
-                self.ship.ship_rectangle.x -=self.game_settings.current_speed
+                self.ship.rect.x -=self.game_settings.current_speed
                 self.game_settings.current_speed *=1.05
             else: 
-                self.ship.ship_rectangle.x -= self.game_settings.SPEED_LIMIT
-        elif keys[pygame.K_UP] is True:
-            # Logic for moving up 
-            if self.game_settings.current_speed < self.game_settings.SPEED_LIMIT: 
-                self.ship.ship_rectangle.y -=self.game_settings.current_speed
-                self.game_settings.current_speed *=1.05
-            else: 
-                self.ship.ship_rectangle.y -= self.game_settings.SPEED_LIMIT
-        elif keys[pygame.K_DOWN] is True:
-            # Logic for moving down
-            if self.game_settings.current_speed < self.game_settings.SPEED_LIMIT:
-                self.ship.ship_rectangle.y +=self.game_settings.current_speed
-                self.game_settings.current_speed *=1.05
-            else: 
-                self.ship.ship_rectangle.y += self.game_settings.SPEED_LIMIT
+                self.ship.rect.x -= self.game_settings.SPEED_LIMIT
         else:
             # Resetting movement speed when a key not key is being pressed
             self.game_settings.current_speed = self.game_settings.BASE_SPEED

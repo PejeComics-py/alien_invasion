@@ -5,7 +5,7 @@ class Alien(Sprite):
     """A class to represent aliens' fleet"""
     def __init__(self, alien_invasion):
         super().__init__() #Import Sprite methods and attributes 
-        self.ALIEN_SIZE = (40,30)
+        self.ALIEN_SIZE = (47.5,37.5)
 
         self.settings = alien_invasion.game_settings
         self.screen = alien_invasion.screen # Get screen surface object from alien invasion instance
@@ -24,6 +24,12 @@ class Alien(Sprite):
 
         self.x = float(self.rect.x)
 
+    def check_edges(self):
+        """ Check if one alien instance is at edge of screen """
+        screen_rect = self.screen.get_rect()
+        return (self.rect.right >= screen_rect.right) or (self.rect.left <= 0) 
+
     def update(self):
-        self.x += self.settings.ALIEN_SPEED
+        """Move the alien to right or left"""
+        self.x += self.settings.ALIEN_SPEED * self.settings.fleet_direction
         self.rect.x = self.x
