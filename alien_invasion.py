@@ -24,7 +24,7 @@ class AlienInvasion:
         self.aliens = pygame.sprite.Group()    
         self.stats = GameStats(self)
         # Start alien invasion bool
-        self.game_active = True
+        self.game_active = False
         self.__create_fleet()
 
     def run_game(self):
