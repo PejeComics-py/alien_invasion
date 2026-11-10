@@ -19,7 +19,7 @@ class Bullet(Sprite):
         self.y = float(self.rect.y)
     def update(self):
         """Bullet's movement"""
-        self.y -= self.settings.BULLET_SPEED 
+        self.y -= self.settings.bullet_speed 
         self.rect.y = self.y
 
     def draw_bullet(self):
