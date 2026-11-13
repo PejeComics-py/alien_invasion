@@ -2,6 +2,14 @@
 
 An Alien invasion game created with the pygame-ce library, project based with the tutorial from the "Python Crash Course 3rd Edition" 
 
+## Installation
+
+To install game's files:
+
+```bash
+git clone https://github.com/PejeComics-py/alien_invasion
+```
+
 ## How to play
 
 Assuming that you are located in the projects folders directory
