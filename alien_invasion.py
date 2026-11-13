@@ -1,4 +1,4 @@
-#!./env/bin/python
+#!./venv/bin/python
 
 import sys  # Module to interact with the system
 import pygame  # Module to create games 
