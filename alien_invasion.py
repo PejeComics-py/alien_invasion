@@ -1,14 +1,15 @@
-#!/usr/bin/python
+#!./env/bin/python
 
 import sys  # Module to interact with the system
 import pygame  # Module to create games 
 from settings import Settings 
-from ships import Ship
+from ship import Ship
 from bullet import Bullet
 from alien import Alien
 from time import sleep
 from gamestats import GameStats
 from button import Button
+from scoreboard import Scoreboard
 
 class AlienInvasion:
     """Class to manage game assets and behavior"""
@@ -20,10 +21,14 @@ class AlienInvasion:
         self.clock = pygame.time.Clock() # Create object clock object 
         self.screen_color = (self.game_settings.SCREEN_COLOR)
         pygame.display.set_caption("Alien Invasion")
+
+        # Dedicated game objects 
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()    
         self.stats = GameStats(self)
+        self.sb = Scoreboard(self)
+
         # Start alien invasion bool
         self.game_active = False
         self.__create_fleet()
@@ -78,6 +83,10 @@ class AlienInvasion:
     def __update_screen(self):
         """Update screen events"""
         self.screen.fill(self.screen_color) # Function a fills a color to surface object
+
+        if self.game_active:  
+            self.sb.prep_ships()
+            self.sb.show_score()
                
         if self.game_active:
             self.ship.draw_me() # Draw the ship
@@ -101,13 +110,22 @@ class AlienInvasion:
         self.bullets.update()
         self.__remove_bullet()
         self.__check_bullet_collisions()
+        # Updates level scaling and level
         if len(self.aliens) == 0:
+            self.stats.level += 1
+            self.sb.prep_level()
             self.__reset()
             self.game_settings.initilialize_dynamic_settings()
 
     def __check_bullet_collisions(self):
         """Kill aliens with pew pew"""
         collisions = pygame.sprite.groupcollide(self.bullets,self.aliens, True, True)
+
+        if collisions:
+            for aliens in collisions.values():
+                self.stats.score += self.game_settings.alien_points * len(aliens)
+            self.sb.prep_score()
+            self.sb.check_high_score()
 
     def __reset(self):
         """ Reset game """
@@ -135,12 +153,12 @@ class AlienInvasion:
         alien_width, alien_height = alien.rect.width, alien.rect.height
         
         # Get screen properties
-        current_x,current_y = alien_width, alien_height
+        current_x,current_y = alien_width, 100
         screen_resolution = list(self.game_settings.SCREEN_RESOLUTION)
         screen_width,screen_height = screen_resolution
 
         # Loops to control alien generation in x and y
-        while current_y < ((screen_height / 2) - (alien_height)):
+        while current_y < (screen_height / 2):
             while current_x < (screen_width - (2 * alien_width)):
                 
                 # Create alien instance and move 2 times the alien width
@@ -171,6 +189,7 @@ class AlienInvasion:
         """ Respond when ship is hit"""
         # Reduce ship lives
         self.stats.ships_lives -= 1
+        self.sb.prep_ships()
 
         if self.stats.ships_lives > 0:
             # Reset game
@@ -179,6 +198,8 @@ class AlienInvasion:
         else:
             self.game_active = False 
             self.stats.reset_stats()
+            self.sb.prep_score()
+            self.sb.prep_level()
             self.__reset()
             pygame.mouse.set_visible(True)
 
